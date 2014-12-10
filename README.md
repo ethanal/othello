@@ -1,6 +1,6 @@
 # Othello Moderator
 
-A Python 3 Othello moderator. Implement AIs in the `players` module by implementing the `Player` class. The module name (the filename without the .py extension) should be the same as the class name for it to be detected.
+A Python 3 Othello moderator. AIs are submodules of the `players` module that contain an implementation the `Player` class. The class name must be the same as the module name (the filename without the .py extension) for it to be detected.
 
 ```
 usage: moderator.py [-h] [-g | -t] [players [players ...]]
