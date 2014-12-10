@@ -1,5 +1,5 @@
 import tkinter
-from .base import Display
+from . import Display
 
 
 class GraphicalDisplay(Display):

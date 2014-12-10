@@ -1,6 +1,6 @@
 import os
 import platform
-from .base import Display
+from . import Display
 
 
 class TerminalDisplay(Display):
