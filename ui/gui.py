@@ -1,8 +1,10 @@
 import tkinter
-from . import UI
 import multiprocessing as mp
 import threading
 import os
+
+from . import UI
+
 import sys
 sys.path.insert(0, "..")
 from game import State

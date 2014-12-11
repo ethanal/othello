@@ -102,7 +102,9 @@ class OthelloBoard:
                 rowp += drow
                 colp += dcol
 
-            if (0 <= rowp <= 7 and 0 <= colp <= 7 and self.board[rowp][colp] is player):
+            if 0 <= rowp <= 7 and \
+               0 <= colp <= 7 and \
+               self.board[rowp][colp] is player:
                 rowp -= drow
                 colp -= dcol
 
