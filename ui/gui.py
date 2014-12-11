@@ -19,7 +19,7 @@ class GraphicalUI(UI):
         disk_padding = 7
 
         self.root = tkinter.Tk()
-        self.root.title("Reversi")
+        self.root.title("Othello")
         self.root.geometry("460x500")
         self.root.resizable(width=False, height=False)
         self.canvas = tkinter.Canvas(self.root,
@@ -48,7 +48,7 @@ class GraphicalUI(UI):
             padx=20,
             pady=10
         )
-        self.player_1_label.place(relx=0, anchor="nw")
+        self.player_1_label.place(relx=0, anchor=tkinter.NW)
 
         self.player_2_title = tkinter.StringVar()
         self.player_2_title.set("White")
@@ -58,7 +58,7 @@ class GraphicalUI(UI):
             padx=20,
             pady=10
         )
-        self.player_2_label.place(relx=1, anchor="ne")
+        self.player_2_label.place(relx=1, anchor=tkinter.NE)
 
         self.disks = []
         for row in range(8):
