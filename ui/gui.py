@@ -117,11 +117,13 @@ class GraphicalUI(UI):
                                 "{} disks".format(p2_name, p2_count))
 
         self.player_1_label.configure(
-            fg=GraphicalUI.GREEN if self.game.player is State.black else GraphicalUI.BLACK
+            fg=(GraphicalUI.GREEN if self.game.player is State.black else
+                GraphicalUI.BLACK)
         )
 
         self.player_2_label.configure(
-            fg=GraphicalUI.GREEN if self.game.player is State.white else GraphicalUI.BLACK
+            fg=(GraphicalUI.GREEN if self.game.player is State.white else
+                GraphicalUI.BLACK)
         )
 
         for row in range(8):
