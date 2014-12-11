@@ -3,7 +3,7 @@
 
 import argparse
 import sys
-from game import OthelloGame
+from game import OthelloGame, State
 
 
 def has_tkinter():
@@ -17,19 +17,19 @@ def has_tkinter():
 
 def main(argv):
     parser = argparse.ArgumentParser(description="Othello Moderator")
-    display_group = parser.add_mutually_exclusive_group(required=False)
+    ui_group = parser.add_mutually_exclusive_group(required=False)
 
-    display_group.add_argument(
+    ui_group.add_argument(
         "-g",
         "--graphical",
         action="store_true",
-        help="Use a graphical display"
+        help="Use a graphical UI"
     )
-    display_group.add_argument(
+    ui_group.add_argument(
         "-t",
         "--terminal",
         action="store_true",
-        help="Use a text-based display"
+        help="Use a text-based UI"
     )
 
     parser.add_argument("players", nargs="*")
@@ -40,11 +40,11 @@ def main(argv):
         args.graphical = True
 
     if has_tkinter() and args.graphical:
-        from displays.gui import GraphicalDisplay
-        display = GraphicalDisplay
+        from ui.gui import GraphicalUI
+        ui = GraphicalUI
     else:
-        from displays.terminal import TerminalDisplay
-        display = TerminalDisplay
+        from ui.terminal import TerminalUI
+        ui = TerminalUI
 
     players = args.players
     if len(players) == 0:
@@ -64,8 +64,8 @@ def main(argv):
             print("Player '{}' does not exist".format(players[1]))
             exit(1)
 
-        game = OthelloGame(player_1, player_2, display=display)
-        game.start()
+        game = OthelloGame(player_1, player_2, ui=ui)
+        game.play()
     else:
         print("Provide the names of two players as arguments or provide "
               "no names to run a tournament.")
