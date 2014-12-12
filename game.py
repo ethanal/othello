@@ -4,7 +4,7 @@ import queue
 from players.Human import Human
 
 
-class State:
+class State(object):
     empty = 0
     black = 1
     white = 2
@@ -28,7 +28,7 @@ class InvalidMoveException(Exception):
     pass
 
 
-class OthelloBoard:
+class OthelloBoard(object):
     directions = ((-1, 0),   # N
                   (-1, 1),   # NE
                   (0, 1),    # E
@@ -123,7 +123,8 @@ class OthelloBoard:
         return total
 
 
-class OthelloGame:
+class OthelloGame(object):
+    TIMEOUT = 10
 
     def __init__(self, player_1, player_2, ui=None):
         if ui is None:
@@ -135,8 +136,15 @@ class OthelloGame:
                 ui = TerminalUI
         ui = ui(self)
         self.ui = ui
-        self.players = (player_1(State.black, ui.get_move),
-                        player_2(State.white, ui.get_move))
+
+        def raise_exception():
+            raise Exception("Only Human players can get moves from the user.")
+
+        get_move_1 = ui.get_move if player_1 is Human else raise_exception
+        get_move_2 = ui.get_move if player_2 is Human else raise_exception
+
+        self.players = (player_1(State.black, get_move_1),
+                        player_2(State.white, get_move_2))
         self.board = OthelloBoard()
         self.player = State.black
         self.moves = []
@@ -161,7 +169,6 @@ class OthelloGame:
             player = self.players[0]
             squares = 4
             stuck = 0
-            timeout = 3
             turn = 1
 
             while squares < 64 and stuck < 2:
@@ -180,7 +187,7 @@ class OthelloGame:
                                    args=(q, player, deepcopy(self.board)))
                     p.start()
                     try:
-                        move = q.get(timeout=timeout)
+                        move = q.get(timeout=OthelloGame.TIMEOUT)
                     except queue.Empty:
                         if p.is_alive():
                             p.terminate()
