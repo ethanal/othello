@@ -18,8 +18,6 @@ class GraphicalUI(UI):
     def __init__(self, game):
         super(GraphicalUI, self).__init__(game)
 
-        disk_padding = 7
-
         self.root = tkinter.Tk()
         self.root.title("Othello")
         self.root.geometry("460x500")
@@ -63,6 +61,7 @@ class GraphicalUI(UI):
         self.player_2_label.place(relx=1, anchor=tkinter.NE)
 
         self.disks = []
+        disk_padding = 7
         for row in range(8):
             dy = row * 50
             self.disks.append([])

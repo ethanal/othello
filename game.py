@@ -235,7 +235,7 @@ class OthelloGame:
                 player = self.next_player()
                 print()
 
-            print("Final Board\n-----------")
+            print("Results\n-----------")
             self.ui.update()
 
             white = self.board.count(State.white)
