@@ -203,8 +203,6 @@ class OthelloGame(object):
             turn = 1
 
             while squares < 64 and stuck < 2:
-                if not silent and self.ui.__class__.__name__ != "GraphicalUI":
-                    os.system("clear")
                 move_title = ("#" + str(turn) + ": " +
                               State.player_name(self.player).capitalize() +
                               "'s turn")
