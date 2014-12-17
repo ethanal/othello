@@ -152,7 +152,7 @@ class OthelloBoard(object):
 
 
 class OthelloGame(object):
-    TIMEOUT = 10
+    TIMEOUT = 3
 
     def __init__(self, player_1, player_2, ui=None):
         if ui is None:
@@ -210,68 +210,75 @@ class OthelloGame(object):
                 cprint("-" * len(move_title))
                 self.ui.update()
 
-                if isinstance(player, Human):
-                    move = player.move(deepcopy(self.board))
-                else:
-                    make_move_with_timeout = (
-                        lambda q, player, board: q.put(player.move(board))
-                    )
-                    q = mp.Queue()
-                    p = mp.Process(target=make_move_with_timeout,
-                                   args=(q, player, deepcopy(self.board)))
-                    p.start()
-                    try:
-                        move = q.get(timeout=(OthelloGame.TIMEOUT))
-                    except queue.Empty:
-                        if p.is_alive():
-                            p.terminate()
-
-                        if self.player is State.black:
-                            cprint("Black is disqualified for "
-                                   "taking too much time.")
-                            child_return_pipe.send(State.white)
-                        else:
-                            cprint("White is disqualified for "
-                                   "taking too much time.")
-                            child_return_pipe.send(State.black)
-                        return
-
                 possible = self.board.legal_moves(self.player)
 
-                if move is not None:
-                    if move not in possible:
+                if len(possible) == 0:
+                    stuck += 1
+                    cprint(State.player_name(self.player).capitalize(),
+                           "passes")
+                    move = None
+                else:
+                    if isinstance(player, Human):
+                        move = player.move(deepcopy(self.board))
+                    else:
+                        make_move_with_timeout = (
+                            lambda q, player, board: q.put(player.move(board))
+                        )
+                        q = mp.Queue()
+                        p = mp.Process(target=make_move_with_timeout,
+                                       args=(q, player, deepcopy(self.board)))
+                        p.start()
+                        try:
+                            move = q.get(timeout=(OthelloGame.TIMEOUT))
+                        except queue.Empty:
+                            if p.is_alive():
+                                p.terminate()
+
+                            if self.player is State.black:
+                                cprint("Black is disqualified for "
+                                       "taking too much time.")
+                                child_return_pipe.send(State.white)
+                            else:
+                                cprint("White is disqualified for "
+                                       "taking too much time.")
+                                child_return_pipe.send(State.black)
+                            return
+
+                    if move is None:
                         if self.player is State.black:
-                            cprint("Black is disqualified for "
-                                   "making an illegal move.")
+                            cprint("Black is disqualified for passing illegally.")
                             child_return_pipe.send(State.white)
                         else:
-                            cprint("White is disqualified for "
-                                   "making an illegal move.")
+                            cprint("White is disqualified for passing illegally.")
                             child_return_pipe.send(State.black)
                         return
-
-                    self.board.make_move(move[0], move[1], self.player)
-
-                    move_code = "abcdefgh"[move[1]] + str(move[0] + 1)
-                    cprint(State.player_name(self.player).capitalize(), "moves",
-                           move_code)
-                    cprint("Black:", self.board.count(State.black), "disks")
-                    cprint("White:", self.board.count(State.white), "disks")
-                    stuck = 0
-                elif len(possible) == 0:
-                    stuck += 1
-                    cprint(State.player_name(self.player).capitalize(), "passes")
-                else:
-                    if self.player is State.black:
-                        cprint("Black is disqualified for passing illegally.")
-                        child_return_pipe.send(State.white)
                     else:
-                        cprint("White is disqualified for passing illegally.")
-                        child_return_pipe.send(State.black)
-                    return
+                        if move not in possible:
+                            if isinstance(player, Human):
+                                cprint("Illegal move!\n")
+                                continue
+
+                            if self.player is State.black:
+                                cprint("Black is disqualified for "
+                                       "making an illegal move.")
+                                child_return_pipe.send(State.white)
+                            else:
+                                cprint("White is disqualified for "
+                                       "making an illegal move.")
+                                child_return_pipe.send(State.black)
+                            return
+
+                        self.board.make_move(move[0], move[1], self.player)
+
+                        move_code = "abcdefgh"[move[1]] + str(move[0] + 1)
+                        cprint(State.player_name(self.player).capitalize(), "moves",
+                               move_code)
+                        cprint("Black:", self.board.count(State.black), "disks")
+                        cprint("White:", self.board.count(State.white), "disks")
+                        stuck = 0
+                        squares += 1
 
                 self.moves.append(move)
-                squares += 1
                 turn += 1
                 player = self.next_player()
                 cprint()
