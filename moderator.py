@@ -32,6 +32,8 @@ def main(argv):
         help="Use a text-based UI"
     )
 
+    parser.add_argument("-n", type=int, help="The number of repeated trials to run for a round robin tournament.")
+
     parser.add_argument("players", nargs="*")
 
     args = parser.parse_args(argv)
@@ -49,20 +51,27 @@ def main(argv):
     players = args.players
     if len(players) == 0:
         print("Running tournament...")
+
     elif len(players) == 2:
         try:
             module_1 = __import__("players." + players[0], fromlist=[players[0]])
             player_1 = getattr(module_1, players[0])
-        except (ImportError, AttributeError):
-            print("Player '{}' does not exist".format(players[0]))
-            exit(1)
+        except (ImportError, AttributeError) as e:
+            if "No module named 'players" in str(e):
+                print("Player '{}' does not exist".format(players[0]))
+                exit(1)
+            else:
+                raise e
 
         try:
             module_2 = __import__("players." + players[1], fromlist=[players[1]])
             player_2 = getattr(module_2, players[1])
-        except (ImportError, AttributeError):
-            print("Player '{}' does not exist".format(players[1]))
-            exit(1)
+        except (ImportError, AttributeError) as e:
+            if "No module named 'players" in str(e):
+                print("Player '{}' does not exist".format(players[1]))
+                exit(1)
+            else:
+                raise e
 
         game = OthelloGame(player_1, player_2, ui=ui)
         game.play()
