@@ -1,6 +1,7 @@
 from copy import deepcopy
 import multiprocessing as mp
 import queue
+import os
 from players.Human import Human
 
 
@@ -122,6 +123,33 @@ class OthelloBoard(object):
                     total += 1
         return total
 
+    def total_count(self):
+        total = 0
+        for row in range(8):
+            for col in range(8):
+                if self.board[row][col] is not State.empty:
+                    total += 1
+        return total
+
+    def leader(self):
+        b = self.count(State.black)
+        w = self.count(State.white)
+        if b > w:
+            return State.black
+        if b < w:
+            return State.white
+        return State.draw
+
+    def __getitem__(self, key):
+        return self.board.__getitem__(key)
+
+    def __str__(self):
+        return "\n".join("".join(map(str, l)) for l in self.board) \
+                   .replace("0", ".")
+
+    def __repr__(self):
+        return str(self)
+
 
 class OthelloGame(object):
     TIMEOUT = 10
@@ -158,11 +186,14 @@ class OthelloGame(object):
         self.player = opp
         return self.players[opp_index]
 
-    @staticmethod
-    def _make_move_with_timeout(q, player, board):
-        q.put(player.move(board))
+    def play(self, silent=False):
+        if silent:
+            def cprint(*args, **kwargs):
+                return
+        else:
+            def cprint(*args, **kwargs):
+                print(*args, **kwargs)
 
-    def play(self):
         parent_return_pipe, child_return_pipe = mp.Pipe(duplex=False)
 
         def mainloop():
@@ -172,33 +203,38 @@ class OthelloGame(object):
             turn = 1
 
             while squares < 64 and stuck < 2:
+                if not silent and self.ui.__class__.__name__ != "GraphicalUI":
+                    os.system("clear")
                 move_title = ("#" + str(turn) + ": " +
                               State.player_name(self.player).capitalize() +
                               "'s turn")
-                print(move_title)
-                print("-" * len(move_title))
+                cprint(move_title)
+                cprint("-" * len(move_title))
                 self.ui.update()
 
                 if isinstance(player, Human):
                     move = player.move(deepcopy(self.board))
                 else:
+                    make_move_with_timeout = (
+                        lambda q, player, board: q.put(player.move(board))
+                    )
                     q = mp.Queue()
-                    p = mp.Process(target=OthelloGame._make_move_with_timeout,
+                    p = mp.Process(target=make_move_with_timeout,
                                    args=(q, player, deepcopy(self.board)))
                     p.start()
                     try:
-                        move = q.get(timeout=OthelloGame.TIMEOUT)
+                        move = q.get(timeout=(OthelloGame.TIMEOUT))
                     except queue.Empty:
                         if p.is_alive():
                             p.terminate()
 
                         if self.player is State.black:
-                            print("Black is disqualified for "
-                                  "taking too much time.")
+                            cprint("Black is disqualified for "
+                                   "taking too much time.")
                             child_return_pipe.send(State.white)
                         else:
-                            print("White is disqualified for "
-                                  "taking too much time.")
+                            cprint("White is disqualified for "
+                                   "taking too much time.")
                             child_return_pipe.send(State.black)
                         return
 
@@ -207,32 +243,32 @@ class OthelloGame(object):
                 if move is not None:
                     if move not in possible:
                         if self.player is State.black:
-                            print("Black is disqualified for "
-                                  "making an illegal move.")
+                            cprint("Black is disqualified for "
+                                   "making an illegal move.")
                             child_return_pipe.send(State.white)
                         else:
-                            print("White is disqualified for "
-                                  "making an illegal move.")
+                            cprint("White is disqualified for "
+                                   "making an illegal move.")
                             child_return_pipe.send(State.black)
                         return
 
                     self.board.make_move(move[0], move[1], self.player)
 
                     move_code = "abcdefgh"[move[1]] + str(move[0] + 1)
-                    print(State.player_name(self.player).capitalize(), "moves",
-                          move_code)
-                    print("Black: ", self.board.count(State.black), "disks")
-                    print("White: ", self.board.count(State.white), "disks")
+                    cprint(State.player_name(self.player).capitalize(), "moves",
+                           move_code)
+                    cprint("Black:", self.board.count(State.black), "disks")
+                    cprint("White:", self.board.count(State.white), "disks")
                     stuck = 0
                 elif len(possible) == 0:
                     stuck += 1
-                    print(State.player_name(self.player).capitalize(), "passes")
+                    cprint(State.player_name(self.player).capitalize(), "passes")
                 else:
                     if self.player is State.black:
-                        print("Black is disqualified for passing illegally.")
+                        cprint("Black is disqualified for passing illegally.")
                         child_return_pipe.send(State.white)
                     else:
-                        print("White is disqualified for passing illegally.")
+                        cprint("White is disqualified for passing illegally.")
                         child_return_pipe.send(State.black)
                     return
 
@@ -240,22 +276,25 @@ class OthelloGame(object):
                 squares += 1
                 turn += 1
                 player = self.next_player()
-                print()
+                cprint()
 
-            print("Results\n-----------")
+            cprint("Results\n-------")
             self.ui.update()
 
             white = self.board.count(State.white)
             black = self.board.count(State.black)
+            cprint("Black:", black, "disks")
+            cprint("White:", white, "disks")
 
             if white == black:
-                print("Draw")
+                cprint("Draw")
+
                 child_return_pipe.send(State.draw)
             elif white > black:
-                print("White wins")
+                cprint("White wins")
                 child_return_pipe.send(State.white)
             else:
-                print("Black wins")
+                cprint("Black wins")
                 child_return_pipe.send(State.black)
 
         self.ui.run(mainloop)
