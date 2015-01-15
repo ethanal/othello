@@ -152,9 +152,10 @@ class OthelloBoard(object):
 
 
 class OthelloGame(object):
-    TIMEOUT = 3
 
-    def __init__(self, player_1, player_2, ui=None):
+    def __init__(self, player_1, player_2, ui=None, timeout=None):
+        self.timeout = timeout or 3
+
         if ui is None:
             try:
                 from ui.gui import GraphicalUI
@@ -171,8 +172,8 @@ class OthelloGame(object):
         get_move_1 = ui.get_move if player_1 is Human else raise_exception
         get_move_2 = ui.get_move if player_2 is Human else raise_exception
 
-        self.players = (player_1(State.black, get_move_1),
-                        player_2(State.white, get_move_2))
+        self.players = (player_1(State.black, get_move_1, self.timeout),
+                        player_2(State.white, get_move_2, self.timeout))
         self.board = OthelloBoard()
         self.player = State.black
         self.moves = []
@@ -229,7 +230,7 @@ class OthelloGame(object):
                                        args=(q, player, deepcopy(self.board)))
                         p.start()
                         try:
-                            move = q.get(timeout=(OthelloGame.TIMEOUT))
+                            move = q.get(timeout=self.timeout)
                         except queue.Empty:
                             if p.is_alive():
                                 p.terminate()

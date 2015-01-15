@@ -32,7 +32,20 @@ def main(argv):
         help="Use a text-based UI"
     )
 
-    parser.add_argument("-n", type=int, help="The number of repeated trials to run for a round robin tournament.")
+    parser.add_argument(
+        "-n",
+        "--repeated-trials",
+        type=int,
+        help="The number of repeated trials to run for a round "
+             "robin tournament."
+    )
+
+    parser.add_argument(
+        "-T",
+        "--timeout",
+        type=int,
+        help="The maximum amount of time (seconds) to allow AIs for each move."
+    )
 
     parser.add_argument("players", nargs="*")
 
@@ -73,7 +86,7 @@ def main(argv):
             else:
                 raise e
 
-        game = OthelloGame(player_1, player_2, ui=ui)
+        game = OthelloGame(player_1, player_2, ui=ui, timeout=args.timeout)
         game.play()
     else:
         print("Provide the names of two players as arguments or provide "
