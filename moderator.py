@@ -67,7 +67,8 @@ def main(argv):
 
     elif len(players) == 2:
         try:
-            module_1 = __import__("players." + players[0], fromlist=[players[0]])
+            module_1 = __import__("players." + players[0],
+                                  fromlist=[players[0]])
             player_1 = getattr(module_1, players[0])
         except (ImportError, AttributeError) as e:
             if "No module named 'players" in str(e):
@@ -77,7 +78,8 @@ def main(argv):
                 raise e
 
         try:
-            module_2 = __import__("players." + players[1], fromlist=[players[1]])
+            module_2 = __import__("players." + players[1],
+                                  fromlist=[players[1]])
             player_2 = getattr(module_2, players[1])
         except (ImportError, AttributeError) as e:
             if "No module named 'players" in str(e):

@@ -247,10 +247,12 @@ class OthelloGame(object):
 
                     if move is None:
                         if self.player is State.black:
-                            cprint("Black is disqualified for passing illegally.")
+                            cprint("Black is disqualified for "
+                                   "passing illegally.")
                             child_return_pipe.send(State.white)
                         else:
-                            cprint("White is disqualified for passing illegally.")
+                            cprint("White is disqualified for "
+                                   "passing illegally.")
                             child_return_pipe.send(State.black)
                         return
                     else:
@@ -272,10 +274,15 @@ class OthelloGame(object):
                         self.board.make_move(move[0], move[1], self.player)
 
                         move_code = "abcdefgh"[move[1]] + str(move[0] + 1)
-                        cprint(State.player_name(self.player).capitalize(), "moves",
+                        cprint(State.player_name(self.player).capitalize(),
+                               "moves",
                                move_code)
-                        cprint("Black:", self.board.count(State.black), "disks")
-                        cprint("White:", self.board.count(State.white), "disks")
+                        cprint("Black:",
+                               self.board.count(State.black),
+                               "disks")
+                        cprint("White:",
+                               self.board.count(State.white),
+                               "disks")
                         stuck = 0
                         squares += 1
 
