@@ -1,7 +1,6 @@
 from copy import deepcopy
 import multiprocessing as mp
 import queue
-import os
 from players.Human import Human
 
 
